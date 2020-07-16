@@ -242,7 +242,7 @@ if __name__ == '__main__':
         counterCIE_sh = collections.Counter(degCIE_sh)
         nx.write_graphml(C_shuffled,'networks/bipartite_sh_'+str(i)+'.graphml')
         
-        print("Apply threshold analysis to shuffled graph")
+        print("Apply threshold analysis to shuffled graph ... "+str(i))
         for th_icd in sorted(list(counterCIE_sh.keys())):
             p.apply_async(threshold_analysis, [C_shuffled, th_icd, 0, len(degY_sh), i])
             
