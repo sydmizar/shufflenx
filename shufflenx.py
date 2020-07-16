@@ -163,7 +163,51 @@ def threshold_analysis(C, th, type_proj, nn, iteration):
     else:
         print("The option doesn't exist. Try again.")
     
-def bipartite_drugstargets():
+def suffle_edges_lc(G):
+    
+    # Get the largest component
+    print("Getting largest component ...")
+    components = sorted(nx.connected_components(G), key=len, reverse=True)
+    largest_component = components[0]
+    C = G.subgraph(largest_component)
+        
+    degX,degY=bipartite.degrees(C,nodes_0)
+    degATC = dict(degX).values()
+    degCIE = dict(degY).values()
+    counterATC = collections.Counter(degATC)
+    counterCIE = collections.Counter(degCIE)
+    
+    nodes_0_c = []
+    nodes_1_c = []
+    for n in C.nodes(data=True):
+        if n[1]['bipartite'] == 0:
+            nodes_0_c.append(n[0])
+        if n[1]['bipartite'] == 1:
+            nodes_1_c.append(n[0])
+            
+    print("Shuffling edges ... ")
+    unfrozen_graph = nx.Graph(C)
+#    C_shuffled = copy.copy(C)
+    
+    k=0
+    iter=2*unfrozen_graph.size()
+    while k<iter:
+        r1=random.choice(sorted(dict(degY).keys()))
+        d1=random.choice(list(unfrozen_graph.neighbors(r1)))
+        
+        r2=random.choice(sorted(dict(degY).keys()))
+        d2=random.choice(list(unfrozen_graph.neighbors(r2)))
+        
+        if (unfrozen_graph.has_edge(r1,d2)==False) & (unfrozen_graph.has_edge(r2,d1)==False):
+            unfrozen_graph.add_edge(r1,d2)
+            unfrozen_graph.remove_edge(r1,d1)       
+            unfrozen_graph.add_edge(r2,d1)
+            unfrozen_graph.remove_edge(r2,d2)
+            k=k+1
+            
+    return unfrozen_graph, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c
+    
+if __name__ == '__main__':
     print("Reading file ...")
     vdmdata = pd.read_csv('vdmdata_reduce.csv', encoding = 'utf-8-sig')
     
@@ -189,49 +233,6 @@ def bipartite_drugstargets():
         sustancia = m[1][1];
         G.add_edge(enfermedad, sustancia)
     
-    # Get the largest component
-    print("Getting largest component ...")
-    components = sorted(nx.connected_components(G), key=len, reverse=True)
-    largest_component = components[0]
-    C = G.subgraph(largest_component)
-        
-    degX,degY=bipartite.degrees(C,nodes_0)
-    degATC = dict(degX).values()
-    degCIE = dict(degY).values()
-    counterATC = collections.Counter(degATC)
-    counterCIE = collections.Counter(degCIE)
-    
-    nodes_0_c = []
-    nodes_1_c = []
-    for n in C.nodes(data=True):
-        if n[1]['bipartite'] == 0:
-            nodes_0_c.append(n[0])
-        if n[1]['bipartite'] == 1:
-            nodes_1_c.append(n[0])
-            
-    print("Shuffling edges ... ")
-#    C_shuffled = copy.copy(C)
-    
-    k=0
-    iter=2*C.size()
-    while k<iter:
-        r1=random.choice(sorted(dict(degY).keys()))
-        d1=random.choice(list(C.neighbors(r1)))
-        
-        r2=random.choice(sorted(dict(degY).keys()))
-        d2=random.choice(list(C.neighbors(r2)))
-        
-        if (C.has_edge(r1,d2)==False) & (C.has_edge(r2,d1)==False):
-            C.add_edge(r1,d2)
-            C.remove_edge(r1,d1)       
-            C.add_edge(r2,d1)
-            C.remove_edge(r2,d2)
-            k=k+1
-            
-    return C, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c
-    
-if __name__ == '__main__':
-
 #    type_proj = int(sys.argv[1])
 #    nx.degree_histogram(G)
 #    GPCIE = bipartite.projected_graph(G, nodes_0)
@@ -256,7 +257,7 @@ if __name__ == '__main__':
     for i in range(50):
         print("Shuffle edges ... iteration "+str(i))
         #H = add_and_remove_edges(C, type_proj, dict(degX), dict(degY))
-        C, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c = bipartite_drugstargets()
+        C, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c = suffle_edges_lc(G)
 #        suffle_edges(C, sorted(dict(degX).keys()), sorted(dict(degY).keys()))
         degX_sh,degY_sh=bipartite.degrees(C,nodes_0_c)
         degATC_sh = dict(degX_sh).values()
