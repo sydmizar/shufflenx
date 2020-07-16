@@ -164,6 +164,7 @@ def threshold_analysis(C, th, type_proj, nn, iteration):
         print("The option doesn't exist. Try again.")
     
 def bipartite_drugstargets():
+    print("Reading file ...")
     vdmdata = pd.read_csv('vdmdata_reduce.csv', encoding = 'utf-8-sig')
     
     nodes_0 = []
@@ -208,14 +209,30 @@ def bipartite_drugstargets():
         if n[1]['bipartite'] == 1:
             nodes_1_c.append(n[0])
             
+    print("Shuffling edges ... ")
+#    C_shuffled = copy.copy(C)
+    
+    k=0
+    iter=2*C.size()
+    while k<iter:
+        r1=random.choice(sorted(dict(degY).keys()))
+        d1=random.choice(list(C.neighbors(r1)))
+        
+        r2=random.choice(sorted(dict(degY).keys()))
+        d2=random.choice(list(C.neighbors(r2)))
+        
+        if (C.has_edge(r1,d2)==False) & (C.has_edge(r2,d1)==False):
+            C.add_edge(r1,d2)
+            C.remove_edge(r1,d1)       
+            C.add_edge(r2,d1)
+            C.remove_edge(r2,d2)
+            k=k+1
+            
     return C, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c
     
 if __name__ == '__main__':
 
 #    type_proj = int(sys.argv[1])
-    print("Reading file ...")
-
-    
 #    nx.degree_histogram(G)
 #    GPCIE = bipartite.projected_graph(G, nodes_0)
 #    GPATC = bipartite.projected_graph(G, nodes_1)
@@ -240,7 +257,7 @@ if __name__ == '__main__':
         print("Shuffle edges ... iteration "+str(i))
         #H = add_and_remove_edges(C, type_proj, dict(degX), dict(degY))
         C, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c = bipartite_drugstargets()
-        suffle_edges(C, sorted(dict(degX).keys()), sorted(dict(degY).keys()))
+#        suffle_edges(C, sorted(dict(degX).keys()), sorted(dict(degY).keys()))
         degX_sh,degY_sh=bipartite.degrees(C,nodes_0_c)
         degATC_sh = dict(degX_sh).values()
         degCIE_sh = dict(degY_sh).values()
