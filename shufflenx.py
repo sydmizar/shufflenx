@@ -81,23 +81,23 @@ def gf_multiplyx( g ):
 
 def suffle_edges(C, degree_atc, degree_icd):
     print("Shuffling edges ... ")
-    C_shuffled = copy.copy(C)
+#    C_shuffled = copy.copy(C)
     k=0
-    iter=2*C_shuffled.size()
+    iter=2*C.size()
     while k<iter:
         r1=random.choice(degree_icd)
-        d1=random.choice(list(C_shuffled.neighbors(r1)))
+        d1=random.choice(list(C.neighbors(r1)))
         
         r2=random.choice(degree_icd)
-        d2=random.choice(list(C_shuffled.neighbors(r2)))
+        d2=random.choice(list(C.neighbors(r2)))
         
-        if (C_shuffled.has_edge(r1,d2)==False) & (C_shuffled.has_edge(r2,d1)==False):
-            C_shuffled.add_edge(r1,d2)
-            C_shuffled.remove_edge(r1,d1)       
-            C_shuffled.add_edge(r2,d1)
-            C_shuffled.remove_edge(r2,d2)
+        if (C.has_edge(r1,d2)==False) & (C.has_edge(r2,d1)==False):
+            C.add_edge(r1,d2)
+            C.remove_edge(r1,d1)       
+            C.add_edge(r2,d1)
+            C.remove_edge(r2,d2)
             k=k+1
-    return C_shuffled
+#    return C
 
 def threshold_analysis(C, th, type_proj, nn, iteration):
     print("Creating new graph by given threshold ... "+str(th))
@@ -163,12 +163,7 @@ def threshold_analysis(C, th, type_proj, nn, iteration):
     else:
         print("The option doesn't exist. Try again.")
     
-
-if __name__ == '__main__':
-
-#    type_proj = int(sys.argv[1])
-    print("Reading file ...")
-
+def bipartite_drugstargets():
     vdmdata = pd.read_csv('vdmdata_reduce.csv', encoding = 'utf-8-sig')
     
     nodes_0 = []
@@ -204,6 +199,23 @@ if __name__ == '__main__':
     degCIE = dict(degY).values()
     counterATC = collections.Counter(degATC)
     counterCIE = collections.Counter(degCIE)
+    
+    nodes_0_c = []
+    nodes_1_c = []
+    for n in C.nodes(data=True):
+        if n[1]['bipartite'] == 0:
+            nodes_0_c.append(n[0])
+        if n[1]['bipartite'] == 1:
+            nodes_1_c.append(n[0])
+            
+    return C, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c
+    
+if __name__ == '__main__':
+
+#    type_proj = int(sys.argv[1])
+    print("Reading file ...")
+
+    
 #    nx.degree_histogram(G)
 #    GPCIE = bipartite.projected_graph(G, nodes_0)
 #    GPATC = bipartite.projected_graph(G, nodes_1)
@@ -213,13 +225,6 @@ if __name__ == '__main__':
 #    #plt.loglog(degrees[m:], degree_freq[m:],'go-') 
 #    plt.xlabel('Degree')
 #    plt.ylabel('Frequency')
-    nodes_0_c = []
-    nodes_1_c = []
-    for n in C.nodes(data=True):
-        if n[1]['bipartite'] == 0:
-            nodes_0_c.append(n[0])
-        if n[1]['bipartite'] == 1:
-            nodes_1_c.append(n[0])
 #            
 #    A = bipartite.biadjacency_matrix(C, nodes_0_c, nodes_1_c)
     
@@ -234,20 +239,21 @@ if __name__ == '__main__':
     for i in range(50):
         print("Shuffle edges ... iteration "+str(i))
         #H = add_and_remove_edges(C, type_proj, dict(degX), dict(degY))
-        C_shuffled = suffle_edges(C, sorted(dict(degX).keys()), sorted(dict(degY).keys()))
-        degX_sh,degY_sh=bipartite.degrees(C_shuffled,nodes_0_c)
+        C, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c = bipartite_drugstargets()
+        suffle_edges(C, sorted(dict(degX).keys()), sorted(dict(degY).keys()))
+        degX_sh,degY_sh=bipartite.degrees(C,nodes_0_c)
         degATC_sh = dict(degX_sh).values()
         degCIE_sh = dict(degY_sh).values()
         counterATC_sh = collections.Counter(degATC_sh)
         counterCIE_sh = collections.Counter(degCIE_sh)
-        nx.write_graphml(C_shuffled,'networks/bipartite_sh_'+str(i)+'.graphml')
+        nx.write_graphml(C,'networks/bipartite_sh_'+str(i)+'.graphml')
         
         print("Apply threshold analysis to shuffled graph ... "+str(i))
         for th_icd in sorted(list(counterCIE_sh.keys())):
-            p.apply_async(threshold_analysis, [C_shuffled, th_icd, 0, len(degY_sh), i])
+            p.apply_async(threshold_analysis, [C, th_icd, 0, len(degY_sh), i])
             
         for th_atc in sorted(list(counterATC_sh.keys())):
-            p.apply_async(threshold_analysis, [C_shuffled, th_atc, 1, len(degX_sh), i])
+            p.apply_async(threshold_analysis, [C, th_atc, 1, len(degX_sh), i])
             
 #        if type_proj == 0:
 #            for th in sorted(list(counterCIE_sh.keys())):
