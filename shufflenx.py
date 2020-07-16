@@ -234,7 +234,7 @@ if __name__ == '__main__':
     for i in range(50):
         print("Shuffle edges ... iteration "+str(i))
         #H = add_and_remove_edges(C, type_proj, dict(degX), dict(degY))
-        C_shuffled = suffle_edges(C, sorted(dict(degX).keys()), sorted(dict(degY).keys()), i)
+        C_shuffled = suffle_edges(C, sorted(dict(degX).keys()), sorted(dict(degY).keys()))
         degX_sh,degY_sh=bipartite.degrees(C_shuffled,nodes_0_c)
         degATC_sh = dict(degX_sh).values()
         degCIE_sh = dict(degY_sh).values()
