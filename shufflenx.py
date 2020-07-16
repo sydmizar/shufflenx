@@ -166,7 +166,7 @@ def threshold_analysis(C, th, type_proj, nn, iteration):
 
 if __name__ == '__main__':
 
-    type_proj = int(sys.argv[1])
+#    type_proj = int(sys.argv[1])
     print("Reading file ...")
 
     vdmdata = pd.read_csv('vdmdata_reduce.csv', encoding = 'utf-8-sig')
@@ -241,13 +241,20 @@ if __name__ == '__main__':
         counterATC_sh = collections.Counter(degATC_sh)
         counterCIE_sh = collections.Counter(degCIE_sh)
         nx.write_graphml(C_shuffled,'networks/bipartite_sh_'+str(i)+'.graphml')
+        
         print("Apply threshold analysis to shuffled graph")
-        if type_proj == 0:
-            for th in sorted(list(counterCIE_sh.keys())):
-                p.apply_async(threshold_analysis, [C_shuffled, th, type_proj, len(degY_sh), i])
-        elif type_proj == 1:
-            for th in sorted(list(counterATC_sh.keys())):
-                p.apply_async(threshold_analysis, [C_shuffled, th, type_proj, len(degX_sh), i])
+        for th_icd in sorted(list(counterCIE_sh.keys())):
+            p.apply_async(threshold_analysis, [C_shuffled, th_icd, 0, len(degY_sh), i])
+            
+        for th_atc in sorted(list(counterATC_sh.keys())):
+            p.apply_async(threshold_analysis, [C_shuffled, th_atc, 1, len(degX_sh), i])
+            
+#        if type_proj == 0:
+#            for th in sorted(list(counterCIE_sh.keys())):
+#                p.apply_async(threshold_analysis, [C_shuffled, th, type_proj, len(degY_sh), i])
+#        elif type_proj == 1:
+#            for th in sorted(list(counterATC_sh.keys())):
+#                p.apply_async(threshold_analysis, [C_shuffled, th, type_proj, len(degX_sh), i])
 
     p.close()
     p.join()
