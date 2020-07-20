@@ -19,10 +19,8 @@ from networkx.algorithms import bipartite
 import collections
 import pandas as pd
 import multiprocessing
-import sys
 import time
 import random
-import copy 
 
 #def add_and_remove_edges(C, type_proj, degree_atc, degree_icd):
 #    C_shuffled = copy.copy(C)
@@ -156,11 +154,11 @@ def threshold_analysis(C, th, type_proj, nn, iteration):
     if type_proj == 0:
         with open("threshold_shuffle_icd_"+str(iteration)+".txt", "a+") as f:
             f.write(str(iteration)+","+str(th)+","+str(len(components))+","+str(nodes_connected)+","+str(nodes_unconnected)+","+str(lcs)+","+str(avg_degree)+","+str(mean_size_components)+"\n")
-#        nx.write_graphml(H,'ICD/projICD_th_'+str(th)+'_'+str(iteration)+'.graphml')
+        nx.write_graphml(H,'ICD/projICD_th_'+str(th)+'_'+str(iteration)+'.graphml')
     elif type_proj == 1:
         with open("threshold_shuffle_atc_"+str(iteration)+".txt", "a+") as f:
             f.write(str(iteration)+","+str(th)+","+str(len(components))+","+str(nodes_connected)+","+str(nodes_unconnected)+","+str(lcs)+","+str(avg_degree)+","+str(mean_size_components)+"\n")
-#        nx.write_graphml(H,'ATC/projATC_th_'+str(th)+'_'+str(iteration)+'.graphml')
+        nx.write_graphml(H,'ATC/projATC_th_'+str(th)+'_'+str(iteration)+'.graphml')
     else:
         print("The option doesn't exist. Try again.")
     
