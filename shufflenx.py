@@ -123,6 +123,7 @@ def threshold_analysis(C, th, type_proj, nn, iteration):
             index_source += 1        					
     components = sorted(nx.connected_components(H), key=len, reverse=True)
     nodes_connected = sum(list(map(lambda c: len(c), components)))
+    mean_size_components = nodes_connected / len(components)
     nodes_unconnected = nn - nodes_connected
     lcs = len(components[0])
     degrees = H.degree()
@@ -154,11 +155,11 @@ def threshold_analysis(C, th, type_proj, nn, iteration):
     print("Saving values for the given threshold ..."+str(th))
     if type_proj == 0:
         with open("threshold_shuffle_icd_"+str(iteration)+".txt", "a+") as f:
-            f.write(str(iteration)+","+str(th)+","+str(len(components))+","+str(nodes_connected)+","+str(nodes_unconnected)+","+str(lcs)+","+str(avg_degree)+"\n")
+            f.write(str(iteration)+","+str(th)+","+str(len(components))+","+str(nodes_connected)+","+str(nodes_unconnected)+","+str(lcs)+","+str(avg_degree)+","+str(mean_size_components)+"\n")
 #        nx.write_graphml(H,'ICD/projICD_th_'+str(th)+'_'+str(iteration)+'.graphml')
     elif type_proj == 1:
         with open("threshold_shuffle_atc_"+str(iteration)+".txt", "a+") as f:
-            f.write(str(iteration)+","+str(th)+","+str(len(components))+","+str(nodes_connected)+","+str(nodes_unconnected)+","+str(lcs)+","+str(avg_degree)+"\n")
+            f.write(str(iteration)+","+str(th)+","+str(len(components))+","+str(nodes_connected)+","+str(nodes_unconnected)+","+str(lcs)+","+str(avg_degree)+","+str(mean_size_components)+"\n")
 #        nx.write_graphml(H,'ATC/projATC_th_'+str(th)+'_'+str(iteration)+'.graphml')
     else:
         print("The option doesn't exist. Try again.")
@@ -203,9 +204,10 @@ def suffle_edges_lc(G):
             unfrozen_graph.remove_edge(r1,d1)       
             unfrozen_graph.add_edge(r2,d1)
             unfrozen_graph.remove_edge(r2,d2)
+            print(k)
             k=k+1
             
-    return unfrozen_graph, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c
+    return unfrozen_graph, counterATC, counterCIE, dict(degX), dict(degY), nodes_0_c, nodes_1_c
     
 if __name__ == '__main__':
     print("Reading file ...")
