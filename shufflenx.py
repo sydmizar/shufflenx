@@ -202,7 +202,7 @@ def suffle_edges_lc(G):
             unfrozen_graph.remove_edge(r1,d1)       
             unfrozen_graph.add_edge(r2,d1)
             unfrozen_graph.remove_edge(r2,d2)
-            print(k)
+#            print(k)
             k=k+1
             
     return unfrozen_graph, counterATC, counterCIE, dict(degX), dict(degY), nodes_0_c, nodes_1_c
@@ -254,7 +254,7 @@ if __name__ == '__main__':
 #    for file in names:
 #        p.apply_async(multip, [file])
 
-    for i in range(50):
+    for i in range(1,5,1):
         print("Shuffle edges ... iteration "+str(i))
         #H = add_and_remove_edges(C, type_proj, dict(degX), dict(degY))
         C, counterATC, counterCIE, degX, degY, nodes_0_c, nodes_1_c = suffle_edges_lc(G)
